@@ -25,7 +25,7 @@ const Users = dbConnect.define('users', {
     status: {
         type: DataTypes.STRING,
         allowNull: false,
-		defaultValue: 'actived',
+		defaultValue: 'active',
     }
 });
 

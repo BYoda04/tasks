@@ -21,8 +21,8 @@ const port = process.env.PORT || 4001;
 app.use("/api/v1",require('./routes/users.routes'));
 app.use("/api/v1",require('./routes/tasks.routes'));
 
+connectDB();
+
 app.listen(port,()=>{
     console.log(`Server on Port http://localhost:${port}/api/v1/`);
 });
-
-connectDB();

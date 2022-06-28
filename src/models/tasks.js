@@ -31,8 +31,7 @@ const Tasks = dbConnect.define('tasks', {
     },
     status: {
         type: DataTypes.STRING,
-        allowNull: false,
-		defaultValue: 'actived',
+		defaultValue: 'active'
     }
 });
 

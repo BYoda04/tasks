@@ -51,7 +51,7 @@ const createItem = async (req,res)=>{
             name,
             email,
             password,
-            status:"actived"
+            status:"active"
         })
         
         res.status(201).json({
