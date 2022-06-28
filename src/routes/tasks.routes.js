@@ -1,3 +1,6 @@
+const express = require('express');
+
+//controllers
 const { 
     getItems, 
     createItem, 
@@ -5,15 +8,20 @@ const {
     updateItem, 
     deleteItem 
 } = require('../controllers/tasks');
-const { tasksValidator, statusValidator } = require('../validators/tasksValidator');
 
-const tasksRouter = require('express').Router();
+//validators
+const { statusValidator, taskValidator, finishDateValidator } = require('../validators/taskValidator');
+
+//middlewares
+const { taskExists, limitDate } = require('../middlewares/tasks');
+
+const tasksRouter = express.Router()
 
 // htttp://localhost:port/api/v1/roles GET,POST,DELET,PUT
-tasksRouter.get("/tasks",getItems);
-tasksRouter.get("/tasks/:status", statusValidator,getItem);
-tasksRouter.post("/tasks", tasksValidator,createItem);
-tasksRouter.patch("/tasks/:id",updateItem);
-tasksRouter.delete("/tasks/:id",deleteItem);
+tasksRouter.get("/",getItems);
+tasksRouter.get("/:status", statusValidator,getItem);
+tasksRouter.post("/", taskValidator,createItem);
+tasksRouter.patch("/:id", taskExists, finishDateValidator, limitDate,updateItem);
+tasksRouter.delete("/:id", taskExists,deleteItem);
 
-module.exports = tasksRouter;
+module.exports = { tasksRouter };

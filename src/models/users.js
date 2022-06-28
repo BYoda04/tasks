@@ -1,8 +1,7 @@
-const { dbConnect } = require('../data/database');
-const { DataTypes } = require('sequelize');
+const { db, DataTypes } = require('../utils/database.util');
 
 //Model table
-const Users = dbConnect.define('users', {
+const Users = db.define('users', {
     id: {
         primaryKey: true,
         type: DataTypes.INTEGER,

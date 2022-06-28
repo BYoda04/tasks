@@ -1,3 +1,6 @@
+const express = require('express')
+
+//controllers
 const { 
     getItems, 
     createItem, 
@@ -5,15 +8,20 @@ const {
     updateItem, 
     deleteItem 
 } = require('../controllers/users');
-const { usersValidator } = require('../validators/usersValidator');
 
-const usersRouter = require('express').Router();
+//validators
+const { userValidator } = require('../validators/userValidators');
+
+//middleware
+const { userExists } = require('../middlewares/user');
+
+const usersRouter = express.Router()
 
 // htttp://localhost:port/api/v1/roles GET,POST,DELET,PUT
-usersRouter.get("/users",getItems);
-usersRouter.get("/users/:id",getItem);
-usersRouter.post("/users", usersValidator,createItem);
-usersRouter.patch("/users/:id",updateItem);
-usersRouter.delete("/users/:id",deleteItem);
+usersRouter.get("/",getItems);
+usersRouter.get("/:id", userExists,getItem);
+usersRouter.post("/", userValidator,createItem);
+usersRouter.patch("/:id", userExists,updateItem);
+usersRouter.delete("/:id", userExists,deleteItem);
 
-module.exports = usersRouter;
+module.exports = { usersRouter };

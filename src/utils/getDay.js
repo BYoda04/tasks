@@ -1,3 +1,3 @@
 const day = new Date();
 
-module.exports = day;
+module.exports = { day };

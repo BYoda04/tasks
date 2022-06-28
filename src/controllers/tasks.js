@@ -1,121 +1,84 @@
-const { Tasks } = require("../models/tasks");
-const day = require("../utils/getDay");
+// Models
+const { Tasks } = require('../models/tasks');
 
-const getItems = async (req,res)=>{
-    try {
-        const data = await Tasks.findAll();
-    
-        res.status(200).json({
-            status: 'succes',
-            data
-        });
-    } catch (error) {
-       console.log(error);
-       res.send({"status":"error"}); 
-    }
-}
+// Utils
+const { catchAsync } = require('../utils/catchAsync.util');
+const { AppError } = require('../utils/appError.util');
+const { day } = require('../utils/getDay');
+const { Users } = require('../models/users');
 
-const getItem = async (req,res)=>{
-    try {
-        const { status } = req.params;
+const getItems = catchAsync(async (req,res,next)=>{
+	const data = await Tasks.findAll({
+		include:Users
+	});
 
-        const task = await Tasks.findAll({ where: { status } });
+	res.status(200).json({
+		status: 'succes',
+		data
+	});
+});
 
-        if (!task) {
-            return res.status(404).json({
-                status: 'error',
-                message: 'user not found'
-            });
-            
-        };
+const getItem = catchAsync(async (req,res,next)=>{
+	const { status } = req.params;
 
-        res.status(200).json({
-            status: 'success',
-            task
-        });
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+	const task = await Tasks.findAll({ 
+		where: { status },
+		include:Users
+	});
 
-const createItem = async (req,res)=>{
-    try {
-        const { userId,title,limitDate } = req.body;
-        const roles = await Tasks.create({
-            userId,
-            title,
-            startDate:day,
-            limitDate
-        })
-        
-        res.status(201).json({
-            status: 'succes',
-            roles
-        })
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+	if (!task) {
+		return res.status(404).json({
+			status: 'error',
+			message: 'user not found'
+		});
+		
+	};
 
-const updateItem = async (req,res)=>{
-    try {
-        const { id } = req.params;
+	res.status(200).json({
+		status: 'success',
+		task
+	});
+});
 
-        const task = await Tasks.findOne({ where: { id } });
+const createItem = catchAsync(async (req,res,next)=>{
+	const { userId,title,limitDate } = req.body;
+	const roles = await Tasks.create({
+		userId,
+		title,
+		startDate:day,
+		limitDate
+	})
+	
+	res.status(201).json({
+		status: 'succes',
+		roles
+	})
+});
 
-        if (!task) {
-            res.status(404).json({
-                status: 'error',
-                message: 'user not exist'
-            });
-            
-        };
+const updateItem = catchAsync(async (req,res,next)=>{
+	const { task } = req;
+	const { status } = req;
+	
+	await task.update({ 
+		finishDate:day,
+		status 
+	});
+	
+	return res.status(204).json({ status: 'update' });
+});
 
-        await task.update({ 
-            finishDate:day,
-            status:"completed" 
-        });
+const deleteItem = catchAsync(async (req,res,next)=>{
+	const { task } = req;
+	
+	await task.update({ status:"cancelled" });
 
-        return res.status(204).json({
-            status: 'update'
-        });
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
-
-const deleteItem = async (req,res)=>{
-    try {
-        const { id } = req.params;
-
-        const task = await Tasks.findOne({ where: { id } });
-
-        if (!task) {
-            res.status(404).json({
-                status: 'error',
-                message: 'user not exist'
-            });
-            
-        };
-
-        await task.update({ status:"cancelled" });
-
-        return res.status(204).json({
-            status: 'cancelled'
-        });
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+	return res.status(204).json({ status: 'cancelled' });
+});
 
 module.exports = {
-    getItems,
-    getItem,
-    createItem,
-    updateItem,
-    deleteItem
-}
+	getItems,
+	createItem,
+	getItem,
+	updateItem,
+	deleteItem,
+};

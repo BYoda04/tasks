@@ -1,28 +1,35 @@
-require('dotenv').config();
+require('dotenv').config()
 const express = require('express');
-const cors = require('cors');
 
-//conecction database
-const { connectDB } = require('./data/database');
-
-//routes
-//error TypeError: Router.use() requires a middleware function but got a undefined
+// Routers
 const { usersRouter } = require('./routes/users.routes');
 const { tasksRouter } = require('./routes/tasks.routes');
 
+// Global err controller
+const { globalErrorHandler } = require('./controllers/error.controller');
+
+// Utils
+const { AppError } = require('./utils/appError.util');
+
+// Init express app
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 
-const port = process.env.PORT || 4001;
+// Define endpoints
+app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/tasks', tasksRouter);
 
-//invocate routes
-app.use("/api/v1",require('./routes/users.routes'));
-app.use("/api/v1",require('./routes/tasks.routes'));
-
-connectDB();
-
-app.listen(port,()=>{
-    console.log(`Server on Port http://localhost:${port}/api/v1/`);
+// Handle incoming unknown routes to the server
+app.all('*', (req, res, next) => {
+	next(
+		new AppError(
+			`${req.method} ${req.originalUrl} not found in this server`,
+			404
+		)
+	);
 });
+
+app.use(globalErrorHandler);
+
+module.exports = { app };

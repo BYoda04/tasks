@@ -1,124 +1,68 @@
-const { Tasks } = require("../models/tasks");
-const { Users } = require("../models/users");
+// Models
+const { Users } = require('../models/users');
+const { Tasks } = require('../models/tasks');
 
-const getItems = async (req,res)=>{
-    try {
-        const data = await Users.findAll({
-            include:Tasks
-        });
-    
-        res.status(200).json({
-            status: 'succes',
-            data
-        });
-    } catch (error) {
-       console.log(error);
-       res.send({"status":"error"}); 
-    }
-}
+// Utils
+const { catchAsync } = require('../utils/catchAsync.util');
+const { AppError } = require('../utils/appError.util');
 
-const getItem = async (req,res)=>{
-    try {
-        const { id } = req.params;
+const getItems = catchAsync(async (req, res, next) => {
+	const data = await Users.findAll({
+		include: Tasks,
+	});
 
-        const user = await Users.findOne({ 
-            where: { id },
-            include:Tasks
-        });
+	res.status(200).json({
+		status: 'success',
+		data
+	});
+});
 
-        if (!user) {
-            return res.status(404).json({
-                status: 'error',
-                message: 'user not found'
-            });
-            
-        };
+const getItem = catchAsync(async (req, res, next) => {
+	const { user } = req;
 
-        res.status(200).json({
-            status: 'success',
-            user
-        });
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+	res.status(200).json({
+		status: 'success',
+		user,
+	});
+});
 
-const createItem = async (req,res)=>{
-    try {
-        const { name,email,password } = req.body;
-        const users = await Users.create({
-            name,
-            email,
-            password,
-            status:"active"
-        })
-        
-        res.status(201).json({
-            status: 'succes',
-            users
-        })
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+const createItem = catchAsync(async (req, res, next) => {
+	const { name, email, password } = req.body;
 
-const updateItem = async (req,res)=>{
-    try {
-        const { id } = req.params;
-        const { name,email } = req.body;
+	const newUser = await Users.create({
+		name,
+		email,
+		password,
+	});
 
-        const user = await Users.findOne({ where: { id } });
+	res.status(201).json({
+		status: 'success',
+		newUser,
+	});
+});
 
-        if (!user) {
-            res.status(404).json({
-                status: 'error',
-                message: 'user not exist'
-            });
-            
-        };
+const updateItem = catchAsync(async (req, res, next) => {
+	const { user } = req;
+	const { name,email } = req.body;
 
-        await user.update({ name,email });
+	await user.update({ name,email });
 
-        return res.status(204).json({
-            status: 'update'
-        });
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+	res.status(204).json({ status: 'success' });
+});
 
-const deleteItem = async (req,res)=>{
-    try {
-        const { id } = req.params;
+const deleteItem = catchAsync(async (req, res, next) => {
+	const { user } = req;
 
-        const user = await Users.findOne({ where: { id } });
+	// await user.destroy(); 
+	await user.update({ status: 'deleted' });
 
-        if (!user) {
-            res.status(404).json({
-                status: 'error',
-                message: 'user not exist'
-            });
-            
-        };
-
-        await user.update({ status:"deleted" });
-
-        return res.status(204).json({
-            status: 'deleted'
-        });
-    } catch (error) {
-        console.log(error);
-        res.send({status:"error"});
-    }
-}
+	res.status(204).json({ status: 'success' });
+});
 
 module.exports = {
-    getItems,
-    getItem,
-    createItem,
-    updateItem,
-    deleteItem
-}
+	getItems,
+	createItem,
+	getItem,
+	updateItem,
+	deleteItem,
+};
