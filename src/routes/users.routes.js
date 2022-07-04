@@ -10,7 +10,7 @@ const {
 } = require('../controllers/users');
 
 //validators
-const { userValidator } = require('../validators/userValidators');
+const { usersValidator } = require('../validators/usersValidator');
 
 //middleware
 const { userExists } = require('../middlewares/user');
@@ -20,7 +20,7 @@ const usersRouter = express.Router()
 // htttp://localhost:port/api/v1/roles GET,POST,DELET,PUT
 usersRouter.get("/",getItems);
 usersRouter.get("/:id", userExists,getItem);
-usersRouter.post("/", userValidator,createItem);
+usersRouter.post("/", usersValidator,createItem);
 usersRouter.patch("/:id", userExists,updateItem);
 usersRouter.delete("/:id", userExists,deleteItem);
 
